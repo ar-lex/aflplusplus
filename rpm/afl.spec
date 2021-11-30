@@ -15,7 +15,7 @@ Source1:       hello.c
 BuildRequires: clang
 BuildRequires: llvm-devel gmp-devel
 BuildRequires: gcc gcc-plugin-devel make
-
+BuildRequires: gnu-sed
 
 %global afl_helper_path %{_libdir}/afl
 

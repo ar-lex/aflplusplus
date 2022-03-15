@@ -1,24 +1,26 @@
-Name:          AFLplusplus
-Version:       3.15a
-Release:       1
+%global afl_helper_path %{_libdir}/afl
+#Because option -fstack-clash-protection was added in clang11.
+%global optflags %(echo %{optflags} | sed -e "s|-fstack-clash-protection||g")
 
+Name:          aflplusplus
 Summary:       Practical, instrumentation-driven fuzzer for binary formats
-
+Version:       4.00c
+Release:       1
 License:       ASL 2.0
-
 URL:           https://github.com/AFLplusplus/AFLplusplus
-Source0:    %{name}-%{version}.tar.bz2
-
-# For running the tests:
-Source1:       hello.c
+Source0:       %{name}-%{version}.tar.bz2
+Patch1:        0001-Fix-sed-args.patch
+Provides:      %{name}-fuzz = %{version}-%{release}
 
 BuildRequires: clang
-BuildRequires: llvm-devel gmp-devel
-BuildRequires: gcc gcc-plugin-devel make
+BuildRequires: llvm-devel
+BuildRequires: gmp-devel
+BuildRequires: gcc
+BuildRequires: gcc-plugin-devel
+BuildRequires: make
 BuildRequires: gnu-sed
-
-%global afl_helper_path %{_libdir}/afl
-
+BuildRequires: python3-devel
+BuildRequires: zlib-devel
 
 %description
 American fuzzy lop uses a novel type of compile-time instrumentation
@@ -50,51 +52,33 @@ The code in this package allows you to instrument programs for AFL using
 true compiler-level instrumentation, instead of the more crude
 assembly-level rewriting approach taken by afl-gcc and afl-clang.
 
+%package tests
+Summary:       Testcases for ${name}
 
-%package fuzz
-Summary:       Fuzzer and and auxiliary utilities for %{name}
-
-%description fuzz
-This subpackage contains fuzzer and and auxiliary utilities for %{name}.
-
-%package docs
-Summary:       Documentation, dictionaries and testcases for %{name}
-
-%description docs
-This subpackage contains documentation, dictionaries and testcases for %{name}.
-
+%description tests
+This subpackage contains testcases for %{name}.
 
 %prep
-%setup -q -n %{name}-%{version}/upstream
-
+%autosetup -p1 -n %{name}-%{version}/upstream
 
 %build
-CFLAGS="%{optflags}" \
-AFL_NO_X86=1 \
-%{__make} %{?_smp_mflags} \
+%make_build \
+  AFL_NO_X86=1 \
   PREFIX="%{_prefix}" \
   HELPER_PATH="%{afl_helper_path}" \
   source-only
 
 %install
-AFL_NO_X86=1 \
-  PREFIX="%{_prefix}" make install \
-  HELPER_PATH="%{afl_helper_path}" \
-  DESTDIR="$RPM_BUILD_ROOT"
+export AFL_NO_X86=1
+export PREFIX="%{_prefix}"
+export HELPER_PATH="%{afl_helper_path}"
+%make_install
+rm -rf %{_docdir}/afl
+rm -rf %{_mandir}/man8
 
-%check
-# This just checks that simple programs can be compiled using
-# the compiler wrappers.
 
-ln -sf %{SOURCE1} hello.cpp
-./afl-gcc-fast %{SOURCE1} -o hello
-./hello
-./afl-g++-fast hello.cpp -o hello
-./hello
-./afl-cc %{SOURCE1} -o hello
-./hello
 
-%files fuzz
+%files
 %{_bindir}/afl-analyze
 %{_bindir}/afl-fuzz
 %{_bindir}/afl-plot
@@ -105,6 +89,7 @@ ln -sf %{SOURCE1} hello.cpp
 %{_bindir}/afl-whatsup
 %{_bindir}/afl-persistent-config
 %{_bindir}/afl-system-config
+%{_datadir}/afl/dictionaries/*
 
 %files compillers
 %{_bindir}/afl-c++
@@ -117,13 +102,7 @@ ln -sf %{SOURCE1} hello.cpp
 %{_bindir}/afl-gcc
 %{_bindir}/afl-gcc-fast
 %{_bindir}/afl-g++-fast
+%{afl_helper_path}
 
-%dir %{afl_helper_path}
-%{afl_helper_path}/*
-
-%files docs
-%doc docs/*
-%doc dictionaries/
-%doc testcases/
-
-%changelog
+%files tests
+%{_datadir}/afl/testcases

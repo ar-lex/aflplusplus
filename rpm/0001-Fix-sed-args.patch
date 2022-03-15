@@ -1,0 +1,26 @@
+diff --git a/GNUmakefile.llvm b/GNUmakefile.llvm
+index f1de28a4..3b63d888 100644
+--- a/GNUmakefile.llvm
++++ b/GNUmakefile.llvm
+@@ -140,7 +140,7 @@ endif
+ 
+ # sanity check.
+ # Are versions of clang --version and llvm-config --version equal?
+-CLANGVER = $(shell $(CC) --version | sed -E -ne '/^.*version\ (1?[0-9]\.[0-9]\.[0-9]).*/s//\1/p')
++CLANGVER = $(shell $(CC) --version | sed -r -ne '/^.*version\ (1?[0-9]\.[0-9]\.[0-9]).*/s//\1/p')
+ 
+ # I disable this because it does not make sense with what we did before (marc)
+ # We did exactly set these 26 lines above with these values, and it would break
+diff --git a/frida_mode/test/fasan/GNUmakefile b/frida_mode/test/fasan/GNUmakefile
+index e150a6db..4d54534b 100644
+--- a/frida_mode/test/fasan/GNUmakefile
++++ b/frida_mode/test/fasan/GNUmakefile
+@@ -70,7 +70,7 @@ else
+   $(warning Cannot find clang)
+ endif
+ 
+-CLANGVER = $(shell $(CLANG) --version | sed -E -ne '/^.*version\ (1?[0-9]\.[0-9]\.[0-9]).*/s//\1/p')
++CLANGVER = $(shell $(CLANG) --version | sed -r -ne '/^.*version\ (1?[0-9]\.[0-9]\.[0-9]).*/s//\1/p')
+ $(info Clang version $(CLANGVER))
+ 
+ LLVM_LIBDIR = $(shell $(LLVM_CONFIG) --libdir 2>/dev/null)

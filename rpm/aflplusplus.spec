@@ -73,10 +73,8 @@ export AFL_NO_X86=1
 export PREFIX="%{_prefix}"
 export HELPER_PATH="%{afl_helper_path}"
 %make_install
-rm -rf %{_docdir}/afl
-rm -rf %{_mandir}/man8
-
-
+rm -rf %{buildroot}%{_docdir}/afl
+rm -rf %{buildroot}%{_mandir}/man8
 
 %files
 %{_bindir}/afl-analyze
